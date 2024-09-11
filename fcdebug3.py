@@ -122,30 +122,30 @@ plt.title('Predicted vs Actual Prices (No Regularization)')
 plt.legend()
 plt.show()
 
-#Model with L1=0.1, L2=0.1
+#Model with L1=0.001, L2=0.001
 model_l1_l2_01 = FCN(input_len)
 val_predictions_l1_l2_01 = train_model(model_l1_l2_01, X_train, y_train, X_val, y_val, epochs, batch_size, l1_lambda=0.001, l2_lambda=0.001)
 plt.figure(figsize=(10, 5))
-plot_predictions(y_val, val_predictions_l1_l2_01, scaler, "L1=0.1, L2=0.1")
-plt.title('Predicted vs Actual Prices (L1=0.1, L2=0.1)')
+plot_predictions(y_val, val_predictions_l1_l2_01, scaler, "L1=0.00, L2=0.001")
+plt.title('Predicted vs Actual Prices (L1=0.001, L2=0.001)')
 plt.legend()
 plt.show()
 
-#Model with L1=0.2, L2=0.0
+#Model with L1=0.002, L2=0.0
 model_l1_02 = FCN(input_len)
 val_predictions_l1_02 = train_model(model_l1_02, X_train, y_train, X_val, y_val, epochs, batch_size, l1_lambda=0.002, l2_lambda=0.0)
 plt.figure(figsize=(10, 5))
-plot_predictions(y_val, val_predictions_l1_02, scaler, "L1=0.2, L2=0.0")
-plt.title('Predicted vs Actual Prices (L1=0.2, L2=0.0)')
+plot_predictions(y_val, val_predictions_l1_02, scaler, "L1=0.002, L2=0.0")
+plt.title('Predicted vs Actual Prices (L1=0.002, L2=0.0)')
 plt.legend()
 plt.show()
 
-#Model with L1=0.0, L2=0.2
+#Model with L1=0.0, L2=0.002
 model_l2_02 = FCN(input_len)
 val_predictions_l2_02 = train_model(model_l2_02, X_train, y_train, X_val, y_val, epochs, batch_size, l1_lambda=0.0, l2_lambda=0.002)
 plt.figure(figsize=(10, 5))
-plot_predictions(y_val, val_predictions_l2_02, scaler, "L1=0.0, L2=0.2")
-plt.title('Predicted vs Actual Prices (L1=0.0, L2=0.2)')
+plot_predictions(y_val, val_predictions_l2_02, scaler, "L1=0.0, L2=0.002")
+plt.title('Predicted vs Actual Prices (L1=0.0, L2=0.002)')
 plt.legend()
 plt.show()
 
