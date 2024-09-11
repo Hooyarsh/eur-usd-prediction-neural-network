@@ -67,12 +67,26 @@ class FCN(nn.Module):
         x = self.fc5(x)
         return x
 
+def loss_with_regularization(predictions, targets, model, l1_lambda=0.0, l2_lambda=0.0):
+
+    mse_loss = nn.MSELoss()(predictions, targets)
+
+    l1_norm = sum(p.abs().sum() for p in model.parameters())
+
+    l2_norm = sum(p.pow(2).sum() for p in model.parameters())
+    
+    total_loss = mse_loss + l1_lambda * l1_norm + l2_lambda * l2_norm
+    return total_loss
+
+
 model = FCN(input_len)
 criterion = nn.MSELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 epochs = 100
 batch_size = 32
+l1_lambda = 0.001
+l2_lambda = 0.001
 
 def train_model(model, X_train, y_train, X_val, y_val, epochs, batch_size):
     train_losses = []
@@ -86,7 +100,7 @@ def train_model(model, X_train, y_train, X_val, y_val, epochs, batch_size):
             batch_y = y_train[i:i+batch_size]
             
             predictions = model(batch_X)
-            loss = criterion(predictions, batch_y)
+            loss = loss_with_regularization(predictions, batch_y, model, l1_lambda, l2_lambda)
             
             optimizer.zero_grad()
             loss.backward()
@@ -104,8 +118,15 @@ def train_model(model, X_train, y_train, X_val, y_val, epochs, batch_size):
             else:
                 val_loss = float('nan')
 
+        #train_losses.append(loss.item())
+        val_losses.append(val_loss.item())
+
         if (epoch+1) % 10 == 0:
             print(f'Epoch {epoch+1}/{epochs}, Loss: {loss.item():.4f}, Val Loss: {val_loss:.4f}')
+
+    return train_losses, val_losses
+
+    train_losses, val_losses = train_model(model, X_train, y_train, X_val, y_val, epochs, batch_size, l1_lambda, l2_lambda)
 
     plt.figure(figsize=(10, 5))
     plt.plot(train_losses, label='Training Loss')
@@ -140,21 +161,16 @@ model.eval()
 with torch.no_grad():
     if len(X_val) > 0:
         val_predictions = model(X_val)
-
-if len(X_val) > 0:
-    plot_predictions(y_val, val_predictions, scaler)
+        plot_predictions(y_val, val_predictions, scaler)
 
 with torch.no_grad():
+    if len(X_test) > 0:
+        test_predictions = model(X_test)
+        plot_predictions(y_test, test_predictions, scaler)
+
     last_40_days = X_test[-1].unsqueeze(0)
     next_day_prediction = model(last_40_days)
     next_day_price = scaler.inverse_transform(next_day_prediction.numpy())
     print("Predicted price for the next day:", next_day_price[0][0])
-
-with torch.no_grad():
-    test_predictions = model(X_test)
-
-plot_predictions(y_test, test_predictions, scaler)
-
-
 
 
