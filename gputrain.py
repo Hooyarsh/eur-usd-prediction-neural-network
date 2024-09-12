@@ -6,6 +6,10 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 
+# Check if GPU is available
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"Using device: {device}")
+
 data = pd.read_csv('EURUSDHistoricalData.csv')
 
 print(f"Data loaded: {data.shape[0]} rows and {data.shape[1]} columns")
@@ -35,13 +39,13 @@ test_size = max(1, len(X) - train_size - val_size)
 X_train, X_val, X_test = X[:train_size], X[train_size:train_size + val_size], X[train_size + val_size:]
 y_train, y_val, y_test = y[:train_size], y[train_size:train_size + val_size], y[train_size + val_size:]
 
-# No GPU, just using CPU tensors
-X_train = torch.FloatTensor(X_train)
-X_val = torch.FloatTensor(X_val)
-X_test = torch.FloatTensor(X_test)
-y_train = torch.FloatTensor(y_train)
-y_val = torch.FloatTensor(y_val)
-y_test = torch.FloatTensor(y_test)
+# Move data to GPU if available
+X_train = torch.FloatTensor(X_train).to(device)
+X_val = torch.FloatTensor(X_val).to(device)
+X_test = torch.FloatTensor(X_test).to(device)
+y_train = torch.FloatTensor(y_train).to(device)
+y_val = torch.FloatTensor(y_val).to(device)
+y_test = torch.FloatTensor(y_test).to(device)
 
 class FCN(nn.Module):
     def __init__(self, input_len):
@@ -71,6 +75,7 @@ def loss_with_regularization(predictions, targets, model, l1_lambda=0.0, l2_lamb
     return total_loss
 
 def train_model(model, X_train, y_train, X_val, y_val, epochs, batch_size, l1_lambda=0.0, l2_lambda=0.0):
+    model.to(device)  # Move model to GPU if available
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     
     for epoch in range(epochs):
@@ -113,15 +118,15 @@ val_predictions_wo_reg = train_model(model_wo_reg, X_train, y_train, X_val, y_va
 
 # Model 2: L1=0.1, L2=0.1
 model_l1_l2_01 = FCN(input_len)
-val_predictions_l1_l2_01 = train_model(model_l1_l2_01, X_train, y_train, X_val, y_val, epochs, batch_size, l1_lambda=0.1, l2_lambda=0.1)
+val_predictions_l1_l2_01 = train_model(model_l1_l2_01, X_train, y_train, X_val, y_val, epochs, batch_size, l1_lambda=0.002, l2_lambda=0.002)
 
 # Model 3: L1=0.2, L2=0.0
 model_l1_02 = FCN(input_len)
-val_predictions_l1_02 = train_model(model_l1_02, X_train, y_train, X_val, y_val, epochs, batch_size, l1_lambda=0.2, l2_lambda=0.0)
+val_predictions_l1_02 = train_model(model_l1_02, X_train, y_train, X_val, y_val, epochs, batch_size, l1_lambda=0.004, l2_lambda=0.0)
 
 # Model 4: L1=0.0, L2=0.2
 model_l2_02 = FCN(input_len)
-val_predictions_l2_02 = train_model(model_l2_02, X_train, y_train, X_val, y_val, epochs, batch_size, l1_lambda=0.0, l2_lambda=0.2)
+val_predictions_l2_02 = train_model(model_l2_02, X_train, y_train, X_val, y_val, epochs, batch_size, l1_lambda=0.0, l2_lambda=0.004)
 
 # Plot results
 plt.figure(figsize=(10, 5))
