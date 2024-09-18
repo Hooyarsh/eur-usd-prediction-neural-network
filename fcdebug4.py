@@ -35,7 +35,6 @@ test_size = max(1, len(X) - train_size - val_size)
 X_train, X_val, X_test = X[:train_size], X[train_size:train_size + val_size], X[train_size + val_size:]
 y_train, y_val, y_test = y[:train_size], y[train_size:train_size + val_size], y[train_size + val_size:]
 
-# No GPU, just using CPU tensors
 X_train = torch.FloatTensor(X_train)
 X_val = torch.FloatTensor(X_val)
 X_test = torch.FloatTensor(X_test)
@@ -107,47 +106,47 @@ def plot_predictions(y_val, predictions, scaler, label):
 epochs = 100
 batch_size = 32
 
-# Model 1: Without regularization
+#Without regularization
 model_wo_reg = FCN(input_len)
 val_predictions_wo_reg = train_model(model_wo_reg, X_train, y_train, X_val, y_val, epochs, batch_size)
 
-# Model 2: L1=0.1, L2=0.1
+#L1=0.002, L2=0.002
 model_l1_l2_01 = FCN(input_len)
-val_predictions_l1_l2_01 = train_model(model_l1_l2_01, X_train, y_train, X_val, y_val, epochs, batch_size, l1_lambda=0.1, l2_lambda=0.1)
+val_predictions_l1_l2_01 = train_model(model_l1_l2_01, X_train, y_train, X_val, y_val, epochs, batch_size, l1_lambda=0.002, l2_lambda=0.002)
 
-# Model 3: L1=0.2, L2=0.0
+#L1=0.004, L2=0.0
 model_l1_02 = FCN(input_len)
-val_predictions_l1_02 = train_model(model_l1_02, X_train, y_train, X_val, y_val, epochs, batch_size, l1_lambda=0.2, l2_lambda=0.0)
+val_predictions_l1_02 = train_model(model_l1_02, X_train, y_train, X_val, y_val, epochs, batch_size, l1_lambda=0.004, l2_lambda=0.0)
 
-# Model 4: L1=0.0, L2=0.2
+#L1=0.0, L2=0.004
 model_l2_02 = FCN(input_len)
-val_predictions_l2_02 = train_model(model_l2_02, X_train, y_train, X_val, y_val, epochs, batch_size, l1_lambda=0.0, l2_lambda=0.2)
+val_predictions_l2_02 = train_model(model_l2_02, X_train, y_train, X_val, y_val, epochs, batch_size, l1_lambda=0.0, l2_lambda=0.004)
 
 # Plot results
 plt.figure(figsize=(10, 5))
 
-# Plot 1: No regularization
+#No regularization
 plt.subplot(2, 2, 1)
 plot_predictions(y_val, val_predictions_wo_reg, scaler, "No Regularization")
 plt.title('No Regularization')
 plt.legend()
 
-# Plot 2: L1=0.1, L2=0.1
+#L1=0.002, L2=0.002
 plt.subplot(2, 2, 2)
-plot_predictions(y_val, val_predictions_l1_l2_01, scaler, "L1=0.1, L2=0.1")
-plt.title('L1=0.1, L2=0.1')
+plot_predictions(y_val, val_predictions_l1_l2_01, scaler, "L1=0.002, L2=0.002")
+plt.title('L1=0.002, L2=0.002')
 plt.legend()
 
-# Plot 3: L1=0.2, L2=0.0
+#L1=0.004, L2=0.0
 plt.subplot(2, 2, 3)
-plot_predictions(y_val, val_predictions_l1_02, scaler, "L1=0.2, L2=0.0")
-plt.title('L1=0.2, L2=0.0')
+plot_predictions(y_val, val_predictions_l1_02, scaler, "L1=0.004, L2=0.0")
+plt.title('L1=0.004, L2=0.0')
 plt.legend()
 
-# Plot 4: L1=0.0, L2=0.2
+#L1=0.0, L2=0.004
 plt.subplot(2, 2, 4)
-plot_predictions(y_val, val_predictions_l2_02, scaler, "L1=0.0, L2=0.2")
-plt.title('L1=0.0, L2=0.2')
+plot_predictions(y_val, val_predictions_l2_02, scaler, "L1=0.0, L2=0.004")
+plt.title('L1=0.0, L2=0.004')
 plt.legend()
 
 plt.tight_layout()
@@ -156,9 +155,9 @@ plt.show()
 # Combined plot
 plt.figure(figsize=(10, 5))
 plot_predictions(y_val, val_predictions_wo_reg, scaler, "No Regularization")
-plot_predictions(y_val, val_predictions_l1_l2_01, scaler, "L1=0.1, L2=0.1")
-plot_predictions(y_val, val_predictions_l1_02, scaler, "L1=0.2, L2=0.0")
-plot_predictions(y_val, val_predictions_l2_02, scaler, "L1=0.0, L2=0.2")
+plot_predictions(y_val, val_predictions_l1_l2_01, scaler, "L1=0.002, L2=0.002")
+plot_predictions(y_val, val_predictions_l1_02, scaler, "L1=0.004, L2=0.0")
+plot_predictions(y_val, val_predictions_l2_02, scaler, "L1=0.0, L2=0.004")
 plt.title('Combined Predicted vs Actual Prices')
 plt.legend()
 plt.show()
