@@ -1,3 +1,5 @@
+#lstm model with tensorflow without plot
+
 import numpy as np
 import pandas as pd
 from tensorflow.keras.models import Sequential
@@ -22,6 +24,19 @@ def create_sequences(data, input_len, output_len):
 input_len = 40
 output_len = 5
 X, y = create_sequences(scaled_prices, input_len, output_len)
+
+print("Shape of X:", X.shape)
+print("Shape of y:", y.shape)
+
+if len(X.shape) == 2:
+    X = X.reshape((X.shape[0], X.shape[1], 1))
+elif len(X.shape) == 3 and X.shape[2] == 1:
+    print("X is already in the correct shape.")
+else:
+    print("Unexpected shape of X:", X.shape)
+
+print("shape of x after reshape", X.shape)
+
 
 split = int(len(X) * 0.8)
 X_train, X_val = X[:split], X[split:]

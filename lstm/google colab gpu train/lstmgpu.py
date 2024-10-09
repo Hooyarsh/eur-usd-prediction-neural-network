@@ -1,4 +1,5 @@
-#lstm model with tensorflow
+from google.colab import drive
+drive.mount('/content/drive')
 
 import numpy as np
 import pandas as pd
@@ -7,9 +8,17 @@ from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
 from tensorflow.keras.optimizers import Adam
+import tensorflow as tf
+
+device_name = tf.config.list_physical_devices('GPU')
+
+if device_name:
+    print(f"GPU is available: {device_name}")
+else:
+    print("GPU is not available. Using CPU.")
 
 # Load the dataset
-data = pd.read_csv('EURUSDHistoricalData.csv')
+data = pd.read_csv('/content/drive/My Drive/EURUSDHistoricalData.csv')
 prices = data['Price'].values.reshape(-1, 1)
 
 # Scaling the data
