@@ -1,3 +1,6 @@
+from google.colab import drive
+drive.mount('/content/drive')
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -7,6 +10,7 @@ from tensorflow.keras.layers import LSTM, Dense
 from tensorflow.keras.optimizers import Adam
 from kerastuner import HyperModel
 from kerastuner.tuners import Hyperband
+import tensorflow as tf
 
 # Load the dataset
 data = pd.read_csv('/content/drive/My Drive/EURUSDHistoricalData.csv')
