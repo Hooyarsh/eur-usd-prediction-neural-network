@@ -1,5 +1,8 @@
-# use manual grid search - 2 layer lstm
-# No module named 'keras.wrappers'
+# Use manual grid search - 2 layer lstm
+# Optimizing learning rate, dropout, batch size, epochs
+# Fixed (relu)
+# Tunable (Adam, RMSProp)
+# Manual search, less efficient
 
 
 from google.colab import drive
