@@ -10,14 +10,14 @@ from keras.wrappers.scikit_learn import KerasRegressor
 from tensorflow.keras.optimizers import Adam, RMSprop
 import matplotlib.pyplot as plt
 
-# Fetch EUR/USD Data from Alpha Vantage API
-def fetch_candles(symbol, interval='5min', api_key='4ZQTRVFFDVTKZSNF'):
-    url = f'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval={interval}&apikey={api_key}'
+# Fetch Daily EUR/USD Data from Alpha Vantage API
+def fetch_daily_data(symbol, api_key='4ZQTRVFFDVTKZSNF'):
+    url = f'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={api_key}'
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
-        if f"Time Series ({interval})" in data:
-            df = pd.DataFrame(data[f"Time Series ({interval})"]).T
+        if "Time Series (Daily)" in data:
+            df = pd.DataFrame(data["Time Series (Daily)"]).T
             df.columns = ['open', 'high', 'low', 'close', 'volume']
             df['close'] = df['close'].astype(float)
             df['volume'] = df['volume'].astype(float)
@@ -72,30 +72,38 @@ def prepare_lstm_data(data, features, target, timesteps=10):
 
 # Fetch and Process Data
 symbol = 'EURUSD'
-data = fetch_candles(symbol)
+data = fetch_daily_data(symbol)
 
 # Check if data was fetched successfully
 if data.empty:
     raise ValueError("No data fetched. Check the API or symbol.")
 
-# Calculate Technical Indicators
 data['rsi'] = calculate_rsi(data)
 data['macd'], data['signal'] = calculate_macd(data)
 data['upper_band'], data['lower_band'] = calculate_bollinger_bands(data)
 data['vwap'] = calculate_vwap(data)
 
+# Check for NaNs after each calculation
+print(f"Data shape after RSI: {data.dropna().shape}")
+print(f"Data shape after MACD: {data.dropna().shape}")
+print(f"Data shape after Bollinger Bands: {data.dropna().shape}")
+print(f"Data shape after VWAP: {data.dropna().shape}")
+
 # Create Lagged Features
 data = create_lagged_features(data, 'close', lags=3)
-data = data.dropna()  # Drop rows with NaN values after adding indicators and lags
+
+# Drop Rows with NaN Values
+data = data.dropna()
+
+# Debugging: Check data shape
+print(f"Data shape after dropping NaNs: {data.shape}")
+if data.shape[0] == 0:
+    raise ValueError("Not enough data after preprocessing. Increase input data size or adjust indicators.")
 
 # Define Features
 features = ['rsi', 'macd', 'signal', 'upper_band', 'lower_band', 'vwap', 
             'close_lag1', 'close_lag2', 'close_lag3']
 
-# Debugging: Ensure enough data is available
-print(f"Data shape after preprocessing: {data.shape}")
-if data[features].shape[0] == 0:
-    raise ValueError("Not enough data after preprocessing. Please check the data source and preprocessing steps.")
 
 # Scale Data
 scaler = MinMaxScaler()
