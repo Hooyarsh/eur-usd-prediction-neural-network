@@ -4,8 +4,6 @@
 #Implements a full grid search with cross-validation to identify the best hyperparameters for the model.
 #More flexible and likely to yield better results by tuning hyperparameters through GridSearchCV.
 
-
-
 from google.colab import drive
 drive.mount('/content/drive')
 
@@ -18,6 +16,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, LSTM, Dense, Dropout, Conv1D, Flatten, concatenate
 from keras.wrappers.scikit_learn import KerasRegressor
 from tensorflow.keras.optimizers import Adam
+import tensorflow as tf
 
 # Load the dataset
 data = pd.read_csv('/content/drive/My Drive/EURUSDHistoricalData.csv')
@@ -61,17 +60,17 @@ def create_hybrid_model(learning_rate=0.001, dropout_rate=0.2):
     x2 = Conv1D(filters=64, kernel_size=3, activation='relu')(input_layer)
     x2 = Conv1D(filters=32, kernel_size=3, activation='relu')(x2)
     x2 = Conv1D(filters=16, kernel_size=3, activation='relu')(x2)
-    x2_flat = Flatten()(x2)
 
     # Path 3: LSTM after CNNs, ending at Point A
-    path3 = LSTM(32)(x2_flat)
+    path3_input = tf.reshape(x2, [-1, x2.shape[1], x2.shape[2]])  # Reshape x2 to maintain 3D structure
+    path3 = LSTM(32)(path3_input)
     path3_output = Dense(32, activation='relu')(path3)
 
     # Path 4: Additional CNN and LSTM layers, ending at Point B
     x4 = Conv1D(filters=16, kernel_size=3, activation='relu')(x2)
     x4 = Conv1D(filters=8, kernel_size=3, activation='relu')(x4)
-    x4 = Flatten()(x4)
-    path4 = LSTM(32)(x4)
+    path4_input = tf.reshape(x4, [-1, x4.shape[1], x4.shape[2]])  # Reshape x4 to maintain 3D structure
+    path4 = LSTM(32)(path4_input)
     point_B = Dense(32, activation='relu')(path4)
 
     # Merge points A, B, and Path 3
